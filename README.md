@@ -1,45 +1,133 @@
-Overview
-========
+# ETL Pipeline with Apache Airflow
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+This project guides you through building an ETL (Extract‑Transform‑Load) pipeline using Apache Airflow. You extract stock market data from the Polygon API, transform it into a tabular format, and load it into a SQLite database. Apache Airflow orchestrates the workflow, making it reliable and easy to manage.
 
-Project Contents
-================
+---
 
-Your Astro project contains the following files and folders:
+## Live or Screenshot Preview
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
-    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+*(Add a screenshot here to visually showcase your Airflow DAG or pipeline results.)*
 
-Deploy Your Project Locally
-===========================
+```
+![Airflow ETL Pipeline Screenshot](screenshot.png)
+```
 
-Start Airflow on your local machine by running 'astro dev start'.
+---
 
-This command will spin up five Docker containers on your machine, each for a different Airflow component:
+## Project Overview
 
-- Postgres: Airflow's Metadata Database
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- DAG Processor: The Airflow component responsible for parsing DAGs
-- API Server: The Airflow component responsible for serving the Airflow UI and API
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+**Objective:**
 
-When all five containers are ready the command will open the browser to the Airflow UI at http://localhost:8080/. You should also be able to access your Postgres Database at 'localhost:5432/postgres' with username 'postgres' and password 'postgres'.
+* Build a reliable ETL pipeline that pulls stock market data, transforms it, and persists it in a SQLite database
+* Use Apache Airflow to automate, schedule, and monitor the pipeline
 
-Note: If you already have either of the above ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
+**Data Source:**
 
-Deploy Your Project to Astronomer
-=================================
+* Polygon API (stock market data via free-tier API)
 
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
+**Destination:**
 
-Contact
-=======
+* SQLite database for simple and easy data analysis
 
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+---
+
+## Tech Stack
+
+| Component              | Tools & Technologies                           |
+| ---------------------- | ---------------------------------------------- |
+| Workflow Orchestration | Apache Airflow (with Astro CLI & TaskFlow API) |
+| Data Extraction        | Python (`requests` module)                     |
+| Data Transformation    | Pandas (JSON flattening, cleaning)             |
+| Data Storage           | SQLite database                                |
+| Development Tools      | Astro CLI, Docker (for Airflow environment)    |
+
+---
+
+## Pipeline Design & Structure
+
+### Architecture Outline
+
+1. **Extract**
+
+   * Task: `hit_polygon_api`
+   * Fetch stock data via Polygon API using the TaskFlow API in Airflow
+
+2. **Transform**
+
+   * Task: `flatten_market_data`
+   * Parse JSON, fill missing fields with defaults, convert to pandas DataFrame
+
+3. **Load**
+
+   * Task: `load_market_data`
+   * Load cleaned data into a SQLite database table
+
+### DAG Configuration Highlights
+
+| Parameter         | Value                                     |
+| ----------------- | ----------------------------------------- |
+| DAG ID            | `market_etl`                              |
+| Start Date        | January 1, 2024 at 09:00 AM UTC           |
+| Schedule Interval | Daily (`@daily`)                          |
+| Catchup           | `True` (backfills from start date)        |
+| Concurrency       | Max active runs = 1                       |
+| Retries           | 3 retries per task                        |
+| Retry Delay       | 5 minutes between retries                 |
+| Dynamic Tickers   | Supports dynamic DAGs for multiple stocks |
+
+---
+
+## Methodology
+
+1. **Setup Environment**
+
+   * Installed Astro CLI and initialized Airflow project
+   * Defined project structure (`dags/`, `plugins/`, etc.) and launched Airflow via Docker
+
+2. **Define DAG & Tasks**
+
+   * Configured DAG parameters based on the specification
+   * Built `extract`, `transform`, `load` tasks using TaskFlow API
+     ([DataCamp][1], [DataCamp][2])
+
+3. **Extract Phase**
+
+   * Created Python function to call Polygon API and return results
+   * Integrated as `hit_polygon_api` Airflow task
+     ([DataCamp][1])
+
+4. **Transform Phase**
+
+   * Flattened the JSON response into a structured table using pandas
+   * Handled missing fields with sensible defaults
+
+5. **Load Phase**
+
+   * Persisted the resulting DataFrame to a SQLite database
+
+6. **Orchestration & Monitoring**
+
+   * Used Airflow UI to track task status, retries, and logs
+   * DAG runs are scheduled daily, with retries and catchup enabled
+
+---
+
+## Key Learnings & Highlights
+
+* Built a modular ETL pipeline in Python using Airflow’s DAG architecture
+* Applied data extraction from an API, structured transformation, and SQLite loading
+* Configured pipeline scheduling, retries, and catch-up behavior for resilience
+* Learned best practices for pipeline orchestration with TaskFlow API
+
+---
+
+## Possible Extensions
+
+* **Add More Destinations:** Push data to cloud data warehouses like BigQuery or Snowflake
+* **Data Validation:** Introduce quality checks using tools like Great Expectations
+* **Scalability:** Migrate from SQLite to PostgreSQL or other robust databases
+* **Dynamic Pipelines:** Auto-generate DAGs for multiple stock tickers using loops or templates
+* **Visualization and Reporting:** Link pipeline results to BI tools (Tableau, Looker Studio)
+
+---
+
