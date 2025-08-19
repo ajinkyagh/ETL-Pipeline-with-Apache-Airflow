@@ -6,7 +6,7 @@ This project guides you through building an ETL (Extract‑Transform‑Load) pip
 
 ## Architecture Diagram
 
-![](Screenshot.png)
+![](screenshot.png)
 
 
 ---
