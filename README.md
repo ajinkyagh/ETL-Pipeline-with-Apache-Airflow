@@ -1,6 +1,6 @@
 # ETL Pipeline with Apache Airflow
 
-This project guides you through building an ETL (Extract‑Transform‑Load) pipeline using Apache Airflow. You extract stock market data from the Polygon API, transform it into a tabular format, and load it into a SQLite database. Apache Airflow orchestrates the workflow, making it reliable and easy to manage.
+This project guides through building an ETL (Extract‑Transform‑Load) pipeline using Apache Airflow. It extract stock market data from the Polygon API, transform it into a tabular format, and load it into a SQLite database. Apache Airflow orchestrates the workflow, making it reliable and easy to manage.
 
 ---
 
