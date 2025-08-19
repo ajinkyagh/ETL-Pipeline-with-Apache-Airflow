@@ -4,13 +4,10 @@ This project guides you through building an ETL (Extract‑Transform‑Load) pip
 
 ---
 
-## Live or Screenshot Preview
+## Architecture Diagram
 
-*(Add a screenshot here to visually showcase your Airflow DAG or pipeline results.)*
+![](Screenshot.png)
 
-```
-![Airflow ETL Pipeline Screenshot](screenshot.png)
-```
 
 ---
 
